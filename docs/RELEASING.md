@@ -1,24 +1,13 @@
-# First npm release
+# Releasing
 
-Version **0.1.0** is prepared. npm publication is intentionally waiting for the maintainer to create the npm organization and confirm its scope.
+Version **0.1.0** is published as [`@mylasertools/svg-smart-resize`](https://www.npmjs.com/package/@mylasertools/svg-smart-resize). The initial release used the maintainer's npm account `julia.mlt`, an owner of the `mylasertools` organization.
 
-## Already prepared
+## Release checks
 
-- Public repository: https://github.com/mylasertools-com/svg-smart-resize
-- Live demo: https://mylasertools-com.github.io/svg-smart-resize/demo/
-- MIT license, illustrated README, API reference, and contribution guide.
-- ESM/CommonJS builds, matching TypeScript declarations, and zero runtime dependencies.
-- 41 passing geometry tests; CI covers Node 20, 22, and 24, plus Windows.
-- An isolated consumer check installs the tarball and verifies ESM, CommonJS, and TypeScript.
-- Approximately 11 KB gzipped; CI enforces a 12,000-byte budget.
-- Manual `publish.yml` workflow with provenance and npm trusted publishing support.
+The package ships ESM/CommonJS builds and matching TypeScript declarations with zero runtime dependencies. CI covers Node 20, 22, and 24, plus Windows; the gzip budget is 12,000 bytes.
 
-## Resume publication
-
-1. **Confirm the npm scope.** The prepared name is `@mylasertools/svg-smart-resize`. GitHub and npm organizations are separate. The publishing account must have access to the selected npm organization.
-2. If the scope differs, update the package name, lockfile, README examples/badges, demo links, and artwork generator. Regenerate the illustrations with `npm run assets`, commit, and let CI complete.
-3. Start a fresh `npm login --auth-type=web`, then verify the account with `npm whoami`. Login links from an earlier session can expire.
-4. From the repository root, run:
+1. Update the version and changelog, then commit with the repository's explicit maintainer identity. Verify both `git var GIT_AUTHOR_IDENT` and `git var GIT_COMMITTER_IDENT`, and verify the authenticated remote account.
+2. From the repository root, run:
 
    ```sh
    npm ci
@@ -28,27 +17,37 @@ Version **0.1.0** is prepared. npm publication is intentionally waiting for the 
    npm pack --dry-run
    ```
 
-5. Publish the initial version using the authenticated account:
+3. Push to `main` and wait for CI to pass.
+4. Publish using one of the methods below.
+5. Allow npm's publish-time scan to finish before verifying installation. Publication can succeed while the registry still temporarily returns 404; do not republish or bump the version to work around this delay.
+6. Verify the exact version with `npm view @mylasertools/svg-smart-resize@VERSION`, then install it from the registry in a fresh consumer and exercise ESM, CommonJS, and TypeScript.
+7. Create the matching GitHub tag and release from the published commit, using `CHANGELOG.md` for release notes.
 
-   ```sh
-   npm publish --access public
-   ```
+Published npm versions cannot be replaced. Do not reuse a published version number.
 
-   Complete any npm two-factor authentication challenge. Do not put credentials or one-time codes in source files or workflow definitions.
+## Local publication
 
-6. Verify the published version with `npm view @mylasertools/svg-smart-resize version` (substitute the confirmed scope), then install that exact registry version in a fresh consumer and exercise both module entry points.
-7. Create GitHub release `v0.1.0` from the published commit, using `CHANGELOG.md` for release notes. Do not bump the version merely because publication was deferred.
-8. Configure the package's npm trusted publisher for future releases:
+Authenticate with the approved npm account using `npm login --auth-type=web`, then verify it with `npm whoami` and confirm organization access.
 
-   | Setting           | Value                             |
-   | :---------------- | :-------------------------------- |
-   | Provider          | GitHub Actions                    |
-   | Organization/user | `mylasertools-com`                |
-   | Repository        | `svg-smart-resize`                |
-   | Workflow filename | `publish.yml`                     |
-   | Environment       | Leave empty                       |
-   | Allowed action    | Direct publishing (`npm publish`) |
+```sh
+npm publish --access public
+```
 
-   The workflow is manual and runs only from `main`. Its version input must exactly match `package.json`. The workflow file alone does not establish npm trust.
+Complete any npm two-factor authentication challenge. Keep credentials and one-time codes out of source files, logs, and workflow definitions. Local publication does not generate GitHub Actions provenance.
 
-Until publication is complete, the live demo and cloned source are available; registry installation is pending.
+## GitHub Actions trusted publishing
+
+The manual `publish.yml` workflow is prepared for npm trusted publishing with provenance. Configure the package's trusted publisher on npm before using it:
+
+| Setting           | Value                             |
+| :---------------- | :-------------------------------- |
+| Provider          | GitHub Actions                    |
+| Organization/user | `mylasertools-com`                |
+| Repository        | `svg-smart-resize`                |
+| Workflow filename | `publish.yml`                     |
+| Environment       | Leave empty                       |
+| Allowed action    | Direct publishing (`npm publish`) |
+
+The workflow runs only from `main`, and its version input must exactly match `package.json`. The workflow file alone does not establish npm trust. After trust is configured, future releases can use this workflow without storing an npm token in GitHub.
+
+Configure and use the trusted publisher together: npm expires unvalidated configurations after 48 hours. A successful trusted publish validates the configuration. See [npm's announcement](https://github.blog/changelog/2026-10-02-unvalidated-npm-trusted-publishing-configurations-now-expire/).
