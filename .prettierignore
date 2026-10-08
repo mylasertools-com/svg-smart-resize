@@ -1,0 +1,5 @@
+node_modules
+dist
+docs/*.svg
+package-lock.json
+*.tgz

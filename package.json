@@ -1,0 +1,69 @@
+{
+  "name": "@mylasertools/svg-smart-resize",
+  "version": "0.1.0",
+  "description": "Resize SVG designs without resizing their holes and slots. Tiny, dependency-free, browser and Node.js.",
+  "type": "module",
+  "license": "MIT",
+  "author": "MyLaserTools",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mylasertools-com/svg-smart-resize.git"
+  },
+  "homepage": "https://github.com/mylasertools-com/svg-smart-resize#readme",
+  "bugs": "https://github.com/mylasertools-com/svg-smart-resize/issues",
+  "keywords": [
+    "svg",
+    "resize",
+    "laser-cutting",
+    "cad",
+    "holes",
+    "slots",
+    "fabrication",
+    "typescript"
+  ],
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/build.mjs",
+    "test": "node --test",
+    "check": "npm run build && npm test && npm run size",
+    "size": "node scripts/size.mjs",
+    "demo": "node scripts/serve.mjs",
+    "assets": "node scripts/assets.mjs",
+    "prepack": "npm run check",
+    "test:package": "npm run build && node scripts/check-package.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3"
+  }
+}

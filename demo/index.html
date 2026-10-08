@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Resize SVG designs while keeping holes and slots the right physical size. An independent open-source package by MyLaserTools."
+    />
+    <title>SVG Smart Resize — change the size. Keep the fit.</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="./"><span class="mark">↗</span>svg-smart-resize</a>
+      <nav>
+        <a href="https://github.com/mylasertools-com/svg-smart-resize">GitHub ↗</a
+        ><a href="https://www.npmjs.com/package/@mylasertools/svg-smart-resize">npm ↗</a>
+      </nav>
+    </header>
+    <main>
+      <section class="intro">
+        <div>
+          <div class="eyebrow"><span></span> PRECISION, PRESERVED</div>
+          <h1>Change the size.<br /><em>Keep the fit.</em></h1>
+          <p>
+            Make the design bigger or smaller. Keep the holes and slots exactly the size they need
+            to be.
+          </p>
+        </div>
+        <div class="package">
+          <span class="package-label">ONE SMALL PACKAGE. NO DEPENDENCIES.</span
+          ><code>npm i @mylasertools/svg-smart-resize</code>
+          <div><span>~11 KB gzip</span><span>TypeScript</span><span>MIT</span></div>
+        </div>
+      </section>
+      <section class="workbench" aria-label="Interactive resizing demo">
+        <aside class="controls">
+          <div class="control-heading">
+            <span>01 / YOUR DESIGN</span><button id="reset" class="text-button">Reset</button>
+          </div>
+          <label for="example">Try an example</label
+          ><select id="example">
+            <option value="panel">Slotted panel</option>
+            <option value="plate">Mounting plate</option>
+            <option value="tag">Pendant / tag</option>
+          </select>
+          <p id="example-description" class="hint"></p>
+          <label class="upload" for="file"
+            ><span>↑</span> Open your SVG<input id="file" type="file" accept=".svg,image/svg+xml"
+          /></label>
+          <div class="divider"></div>
+          <div class="control-heading">
+            <span>02 / NEW SIZE</span><output id="scale-label" for="scale">150%</output>
+          </div>
+          <input
+            id="scale"
+            type="range"
+            min="40"
+            max="180"
+            step="1"
+            value="150"
+            aria-label="Resize percentage"
+          />
+          <div class="range-labels"><span>40%</span><span>180%</span></div>
+          <div class="dimensions">
+            <label>Width <span>mm</span><input id="width" type="number" step=".1" min=".1" /></label
+            ><label
+              >Height <span>mm</span><input id="height" type="number" step=".1" min=".1"
+            /></label>
+          </div>
+          <label class="check"><input id="lock" type="checkbox" checked /> Keep proportions</label>
+          <div class="divider"></div>
+          <div class="control-heading"><span>03 / KEEP THE FIT</span></div>
+          <label class="check"
+            ><input id="holes" type="checkbox" checked /><span
+              >Keep hole sizes<small>Position follows the resized design</small></span
+            ></label
+          >
+          <label for="slots" class="slot-label">Slots</label
+          ><select id="slots">
+            <option value="width">Keep width · resize depth / length</option>
+            <option value="all">Keep all dimensions</option>
+            <option value="none">Resize with the design</option>
+          </select>
+          <p class="hint">
+            Includes rectangular open slots and enclosed slots. Engraving layers scale with the
+            design.
+          </p>
+          <button id="download" class="primary">Download resized SVG <span>↓</span></button>
+          <p class="privacy">
+            Runs locally in your browser.<br />Your file never leaves this page.
+          </p>
+        </aside>
+        <div class="preview-area">
+          <div class="preview-heading">
+            <div>
+              <span class="eyebrow">THE DIFFERENCE IS IN THE DETAILS</span>
+              <h2>Same design. Smarter resize.</h2>
+            </div>
+            <span id="feature-count" class="count"></span>
+          </div>
+          <div class="comparison">
+            <article class="preview">
+              <div class="card-heading">
+                <span class="dot source"></span>
+                <h3>Original</h3>
+                <span class="badge">SOURCE</span>
+              </div>
+              <div class="canvas"><img id="original-img" alt="Original SVG design" /></div>
+              <div class="measure" id="original-size"></div>
+              <p class="card-note">Your starting dimensions</p>
+            </article>
+            <article class="preview">
+              <div class="card-heading">
+                <span class="dot ordinary"></span>
+                <h3>Ordinary resize</h3>
+              </div>
+              <div class="canvas">
+                <img id="ordinary-img" alt="SVG scaled without preserving features" />
+              </div>
+              <div class="measure" id="ordinary-size"></div>
+              <p class="card-note">Everything changes size</p>
+            </article>
+            <article class="preview smart">
+              <div class="card-heading">
+                <span class="dot smart-dot"></span>
+                <h3>Smart resize</h3>
+                <span class="badge green">FIT KEPT</span>
+              </div>
+              <div class="canvas">
+                <img id="smart-img" alt="Resized SVG with selected features preserved" />
+              </div>
+              <div class="measure" id="smart-size"></div>
+              <p class="card-note">Selected dimensions stay fixed</p>
+            </article>
+          </div>
+          <div id="error" role="alert" hidden></div>
+          <div id="issues" role="status"></div>
+          <div class="feature-table">
+            <div class="table-head">
+              <span>DETECTED FEATURE</span><span>ORIGINAL</span><span>ORDINARY</span
+              ><span>SMART</span>
+            </div>
+            <div id="features"></div>
+          </div>
+          <div class="developer">
+            <div>
+              <span class="eyebrow">BUILT FOR YOUR TOOLBOX</span>
+              <h3>Two functions. Real geometry.</h3>
+              <p>Browser or Node. ESM or CommonJS.<br />No React, no canvas, no WASM.</p>
+            </div>
+            <pre><code id="code"></code></pre>
+          </div>
+        </div>
+      </section>
+      <footer>
+        <span
+          >An independent open-source project by
+          <a href="https://mylasertools.com">MyLaserTools</a>.</span
+        ><span>Geometry is preserved. Materials still deserve a test cut.</span>
+      </footer>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
