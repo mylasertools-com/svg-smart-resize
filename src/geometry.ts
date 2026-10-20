@@ -127,3 +127,10 @@ export function pointSymmetric(poly: Point[], box: Bounds, tolerance: number): b
   }
   return true;
 }
+export function pointBounds(points: Point[]): Bounds {
+  const xs = points.map((p) => p[0]),
+    ys = points.map((p) => p[1]),
+    x = Math.min(...xs),
+    y = Math.min(...ys);
+  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+}

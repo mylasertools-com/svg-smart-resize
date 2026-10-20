@@ -22,7 +22,7 @@ import {
 import { bounds, flatten, serializePath, transformPath, type Contour } from './path.js';
 import { length, type Shape } from './svg.js';
 import { applyEdits, opening } from './xml.js';
-import { boxesOverlap, enclosed, containsPoint, intersects } from './geometry.js';
+import { boxesOverlap, enclosed, containsPoint, intersects, pointBounds } from './geometry.js';
 export { analyzeSvg } from './analyze.js';
 export { SvgResizeError } from './types.js';
 export type {
@@ -84,6 +84,21 @@ function correction(f: Found, sx: number, sy: number, mode: PreserveMode): Matri
       mul(desired, mul(translate(-anchor[0], -anchor[1]), m)),
     ),
   );
+}
+/** Move a joint's inner vertices back to their original depth below the scaled outer line. */
+function keepJointDepth(f: Found, path: Contour, sx: number, sy: number) {
+  const joint = f.joint!,
+    toNew = mul(scale(sx, sy), f.outline.matrix),
+    back = inverse(toNew),
+    [nx, ny] = joint.normal,
+    l = Math.hypot(nx / sx, ny / sy),
+    normal: Point = [nx / sx / l, ny / sy / l],
+    origin: Point = [nx * joint.outer * sx, ny * joint.outer * sy];
+  for (const i of joint.inner) {
+    const p = point(toNew, path[i].values as unknown as Point),
+      shift = joint.depth - (normal[0] * (p[0] - origin[0]) + normal[1] * (p[1] - origin[1]));
+    path[i].values = [...point(back, [p[0] + shift * normal[0], p[1] + shift * normal[1]])];
+  }
 }
 /** Resize an SVG viewport and optionally preserve physical hole/slot dimensions. No DOM needed. */
 export function resizeSvg(svg: string, options: ResizeOptions): ResizeResult {
@@ -155,11 +170,15 @@ export function resizeSvg(svg: string, options: ResizeOptions): ResizeResult {
     const mode = modeFor(f, options);
     if (mode === 'none') continue;
     const paths = output.get(f.outline.shape)!,
-      old = f.outline.shape.paths[f.outline.subpath],
-      c = correction(f, sx, sy, mode);
+      old = f.outline.shape.paths[f.outline.subpath];
     if (f.vertices) {
-      for (const i of f.vertices)
-        paths[f.outline.subpath][i].values = [...point(c, old[i].values as unknown as Point)];
+      // Joints move vertices in place, so several joints can share a corner.
+      if (f.joint) keepJointDepth(f, paths[f.outline.subpath], sx, sy);
+      else {
+        const c = correction(f, sx, sy, mode);
+        for (const i of f.vertices)
+          paths[f.outline.subpath][i].values = [...point(c, old[i].values as unknown as Point)];
+      }
       // Explicit closing lineto must continue to match a moved moveto.
       const p = paths[f.outline.subpath],
         last = p[p.length - 1].type === 'Z' ? p.length - 2 : p.length - 1;
@@ -169,7 +188,7 @@ export function resizeSvg(svg: string, options: ResizeOptions): ResizeResult {
         old[last].values[1] === old[0].values[1]
       )
         p[last].values = [...p[0].values];
-    } else paths[f.outline.subpath] = transformPath(old, c);
+    } else paths[f.outline.subpath] = transformPath(old, correction(f, sx, sy, mode));
     preserved.push({ id: f.feature.id, mode });
   }
   const root = doc.root,
@@ -315,6 +334,21 @@ export function resizeSvg(svg: string, options: ResizeOptions): ResizeResult {
     throw new SvgResizeError('FEATURE_CONFLICT', issues.map((i) => i.message).join(' '));
   const features: Feature[] = prepared.found.map((f) => {
     const mode = preserved.find((p) => p.id === f.feature.id)?.mode;
+    if (f.joint) {
+      const world = geometry.get(f.outline)!.world,
+        b = pointBounds(f.vertices!.map((j) => world[j].values as unknown as Point)),
+        [ax, ay] = f.joint.axis,
+        along = Math.hypot(sx * ax, sy * ay),
+        across = 1 / Math.hypot(f.joint.normal[0] / sx, f.joint.normal[1] / sy);
+      return {
+        ...f.feature,
+        bounds: b,
+        center: [b.x + b.width / 2, b.y + b.height / 2],
+        length: f.feature.length! * along,
+        width: f.joint.depth * (mode ? 1 : across),
+        axis: [(sx * ax) / along, (sy * ay) / along],
+      };
+    }
     const source = f.vertices ? f.vertices.map((i) => f.outline.world[i]) : f.outline.world;
     const path: Contour = f.vertices
       ? [

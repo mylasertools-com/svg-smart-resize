@@ -8,7 +8,7 @@ Small, dependable geometry tools are the goal. Bug reports with a minimal SVG, r
 4. For demo changes, run `npm run demo` and inspect desktop and mobile layouts.
 5. If example behavior changes, run `npm run assets`.
 
-Runtime dependencies need a strong reason. The complete ESM bundle has a 12,000-byte gzip budget. Preserve Bézier curves and arcs in exported SVG; approximation is for analysis only.
+Runtime dependencies need a strong reason. The complete ESM bundle has a 13,000-byte gzip budget. Preserve Bézier curves and arcs in exported SVG; approximation is for analysis only.
 
 Changes should document unsupported input explicitly. Don't silently drop geometry or claim fabrication correctness from a bounding-box check.
 

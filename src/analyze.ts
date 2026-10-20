@@ -8,6 +8,7 @@ import {
   type Point,
 } from './types.js';
 import { mul, point } from './matrix.js';
+import { jointRuns, type JointRun } from './joints.js';
 import { bounds, flatten, isClosed, transformPath, type Contour } from './path.js';
 import { readSvg, type Document, type Shape } from './svg.js';
 import {
@@ -15,6 +16,7 @@ import {
   boxContains,
   enclosed,
   hullArea,
+  pointBounds,
   pointSymmetric,
   rectangle,
   cross,
@@ -34,6 +36,7 @@ export interface Found {
   outline: Outline;
   anchor: Point;
   vertices?: number[];
+  joint?: JointRun;
 }
 export interface Prepared {
   document: Document;
@@ -216,6 +219,29 @@ export function prepare(svg: string, options: AnalyzeOptions = {}): Prepared {
       vertices.pop();
     const sign = Math.sign(area(vertices));
     const occupied = new Set<number>();
+    const runs = jointRuns(
+      vertices,
+      Math.min(outline.bounds.width, outline.bounds.height),
+      Math.max(1e-6, tolerance * 0.05),
+    );
+    runs.forEach((joint, k) => {
+      const b = pointBounds(joint.vertices.map((j) => vertices[j]));
+      const feature: Feature = {
+        id: `shape-${shape.index}:path-${subpath}:joint-${k}`,
+        elementId: shape.node.attrs.id,
+        subpath,
+        kind: 'slot',
+        shape: 'joint',
+        bounds: b,
+        center: center(b),
+        width: joint.depth,
+        length: joint.to - joint.from,
+        axis: joint.axis,
+        source: 'detected',
+      };
+      found.push({ feature, outline, anchor: feature.center, vertices: joint.vertices, joint });
+      joint.vertices.forEach((j) => occupied.add(j));
+    });
     for (let i = 0; i < vertices.length; i++) {
       const ids = [
           i,

@@ -11,7 +11,7 @@ Resize an SVG design while optionally keeping its holes and slots at their origi
 
 **[Try the interactive demo →](https://mylasertools-com.github.io/svg-smart-resize/demo/)** · [API reference](https://github.com/mylasertools-com/svg-smart-resize/blob/main/docs/API.md) · [Report an issue](https://github.com/mylasertools-com/svg-smart-resize/issues)
 
-- **Small:** approximately 11 KB minified + gzipped, with a 12 KB budget enforced in CI.
+- **Small:** approximately 12 KB minified + gzipped, with a 13 KB budget enforced in CI.
 - **Independent:** zero runtime dependencies. No DOM, canvas, framework, or WASM.
 - **Engraving-aware:** cut and engrave layers stay distinct; outlined text scales with the design.
 - **Selective:** preserve holes, whole slots, just slot width, or individual features.
@@ -127,6 +127,7 @@ This is a geometry tool for **plain fabrication SVG**, with explicit errors for 
 | Units          | Root mm, cm, in, px, pt, pc, q; unitless lengths use 96 dpi                         |
 | Enclosed slots | Orthogonal rectangles and rounded `rect` elements, including rotated ones           |
 | Open slots     | Rectangular U-shaped notches on closed outlines made entirely of straight segments  |
+| Finger joints  | Box-style finger edges: depth stays the material thickness, spacing scales          |
 | Presentation   | Basic fill/stroke attributes and drawing styles; title, description, metadata       |
 
 **Detection uses geometry plus available fabrication intent and paint styles.** Operation labels are preferred. Unlabelled stroke-only lettering can still resemble cutouts: mark its group with `data-operation="engrave"` or `data-resize="scale"`. This is not a font-recognition algorithm. A standalone circle needs `data-resize="hole"` if there is no enclosing part outline.

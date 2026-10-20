@@ -4,7 +4,7 @@ Version **0.1.1** is the latest release of [`@mylasertools/svg-smart-resize`](ht
 
 ## Release checks
 
-The package ships ESM/CommonJS builds and matching TypeScript declarations with zero runtime dependencies. CI covers Node 20, 22, and 24, plus Windows; the gzip budget is 12,000 bytes.
+The package ships ESM/CommonJS builds and matching TypeScript declarations with zero runtime dependencies. CI covers Node 20, 22, and 24, plus Windows; the gzip budget is 13,000 bytes.
 
 1. Update the version and changelog, then commit with the repository's explicit maintainer identity. Verify both `git var GIT_AUTHOR_IDENT` and `git var GIT_COMMITTER_IDENT`, and verify the authenticated remote account.
 2. From the repository root, run:

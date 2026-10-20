@@ -14,8 +14,13 @@ export interface Feature {
   elementId?: string;
   subpath: number;
   kind: FeatureKind;
-  /** An enclosed cutout, or a rectangular notch in an outline. */
-  shape: 'interior' | 'notch';
+  /**
+   * An enclosed cutout, a rectangular notch in an outline, or a finger joint
+   * edge. A joint's width is its depth (the material thickness) and its
+   * length runs along the edge; preserving it keeps the depth and scales
+   * the finger spacing, so mating panels still fit.
+   */
+  shape: 'interior' | 'notch' | 'joint';
   /** Physical bounding box in millimetres, including ancestor transforms. */
   bounds: Bounds;
   center: Point;

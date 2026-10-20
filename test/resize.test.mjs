@@ -285,3 +285,42 @@ test('large and irregular artwork cutouts scale with the design', () => {
   near(find(p, 'mount').bounds.width, 4);
   assert.equal(find(p, 'window'), undefined);
 });
+// A 60 x 40 mm panel whose top edge has 6 mm fingers, 3 mm deep (material thickness).
+const fingers = (deep) => {
+  let d = 'M0 0',
+    x = 0;
+  for (let i = 0; i < 4; i++) {
+    x += 6;
+    d += `L${x} 0L${x} ${deep}`;
+    x += 6;
+    d += `L${x} ${deep}L${x} 0`;
+  }
+  return `${d}L60 0L60 40L0 40Z`;
+};
+test('finger joints keep their depth while finger spacing scales', () => {
+  const input = svg(`<path id="panel" d="${fingers(3)}"/>`);
+  const [joint] = analyzeSvg(input).features;
+  assert.equal(joint.shape, 'joint');
+  near(joint.width, 3);
+  for (const factor of [0.5, 1.5]) {
+    const r = resizeSvg(input, { scale: factor, preserve: { slots: 'width' } });
+    assert.deepEqual(r.issues, []);
+    const [after] = analyzeSvg(r.svg).features;
+    assert.equal(after.shape, 'joint');
+    near(after.width, 3);
+    near(r.features[0].width, 3);
+    near(after.bounds.width, joint.bounds.width * factor);
+  }
+  const plain = analyzeSvg(resizeSvg(input, { scale: 0.5 }).svg).features[0];
+  near(plain.width, 1.5);
+});
+test('a comb of narrow, deep slots keeps slot widths instead', () => {
+  const comb = analyzeSvg(
+    svg(
+      '<path d="M0 0L10 0L10 20L13 20L13 0L30 0L30 20L33 20L33 0L50 0L50 20L53 20L53 0L60 0L60 40L0 40Z"/>',
+    ),
+  ).features;
+  assert.equal(comb.length, 3);
+  assert.ok(comb.every((f) => f.shape === 'notch'));
+  near(comb[0].width, 3);
+});

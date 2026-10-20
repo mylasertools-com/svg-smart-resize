@@ -2,6 +2,7 @@
 
 ## 0.1.1
 
+- Detect finger joints on box panels as `joint` features. Preserving them keeps the finger depth (the material thickness) and scales the finger spacing, so panels resized together still mate. Previously every finger gap was a separate notch whose width was pinned, which overlapped the fingers.
 - Only detect hardware-like holes: small next to their part, convex and point-symmetric. Large or irregular decorative cutouts now scale with the design instead of keeping their size.
 - Detected slots must be no wider than half their part, so large rectangular windows scale normally.
 - Ignore cutouts smaller than 0.5 mm.

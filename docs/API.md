@@ -52,15 +52,17 @@ Widths and lengths refer to geometric centerlines, without stroke, kerf, or offs
   elementId?: string;   // the SVG element's id, if present
   subpath: number;      // zero-based contour index
   kind: 'hole' | 'slot';
-  shape: 'interior' | 'notch';
+  shape: 'interior' | 'notch' | 'joint';
   bounds: { x: number; y: number; width: number; height: number }; // mm
   center: [number, number]; // center of the axis-aligned bounds, mm
-  width?: number;       // slot short dimension, mm
-  length?: number;      // enclosed slot long dimension, or open slot depth, mm
-  axis?: [number, number]; // unit vector along slot length/depth
+  width?: number;       // slot short dimension, or joint depth (material thickness), mm
+  length?: number;      // enclosed slot long dimension, open slot depth, or joint edge length, mm
+  axis?: [number, number]; // unit vector along slot length/depth, or along the joint edge
   source: 'detected' | 'marked';
 }
 ```
+
+A `joint` is a finger-jointed edge: the outline steps between two parallel lines one material thickness apart, at least three times. Preserving it (`'width'` or `'all'`) keeps that depth and scales the finger spacing with the design, so mating panels resized together still fit.
 
 Feature IDs describe source traversal order; they are not globally unique or persistent identifiers. Use them with the exact SVG analyzed. For ordinary nonuniform scaling of a rotated slot, `width` describes its transformed short edge; the resulting parallelogram may no longer be classified as an orthogonal slot on re-analysis.
 

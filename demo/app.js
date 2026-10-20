@@ -69,7 +69,9 @@ function update() {
           ? 'Hole'
           : feature.shape === 'notch'
             ? 'Open slot'
-            : 'Enclosed slot') +
+            : feature.shape === 'joint'
+              ? 'Finger joint'
+              : 'Enclosed slot') +
         ' · ' +
         (feature.elementId || '#' + (i + 1));
       const values = [
