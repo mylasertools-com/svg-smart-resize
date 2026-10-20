@@ -81,7 +81,7 @@ test('expanding nested islands cannot silently escape a preserved hole', () => {
 test('reflections and skew preserve a curved hole without replacing it with lines', () => {
   const source = svg(
     outline +
-      '<path id="h" transform="translate(65 10) scale(-1 1) skewX(10)" d="M10 10C10 5 20 5 20 10Q20 17 15 17Q10 17 10 10Z"/>',
+      '<path id="h" data-resize="hole" transform="translate(65 10) scale(-1 1) skewX(10)" d="M10 10C10 5 20 5 20 10Q20 17 15 17Q10 17 10 10Z"/>',
   );
   const before = analyzeSvg(source).features[0];
   const out = resizeSvg(source, { scale: [1.8, 0.7], preserve: { holes: true }, strict: true });

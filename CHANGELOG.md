@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+- Only detect hardware-like holes: small next to their part, convex and point-symmetric. Large or irregular decorative cutouts now scale with the design instead of keeping their size.
+- Detected slots must be no wider than half their part, so large rectangular windows scale normally.
+- Ignore cutouts smaller than 0.5 mm.
+
 ## 0.1.0
 
 First release.

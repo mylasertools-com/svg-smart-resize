@@ -1,6 +1,6 @@
 # Releasing
 
-Version **0.1.0** is published as [`@mylasertools/svg-smart-resize`](https://www.npmjs.com/package/@mylasertools/svg-smart-resize). The initial release used the maintainer's npm account `julia.mlt`, an owner of the `mylasertools` organization.
+Version **0.1.1** is the latest release of [`@mylasertools/svg-smart-resize`](https://www.npmjs.com/package/@mylasertools/svg-smart-resize). Releases use the maintainer's npm account `julia.mlt`, an owner of the `mylasertools` organization.
 
 ## Release checks
 

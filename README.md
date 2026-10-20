@@ -131,7 +131,9 @@ This is a geometry tool for **plain fabrication SVG**, with explicit errors for 
 
 **Detection uses geometry plus available fabrication intent and paint styles.** Operation labels are preferred. Unlabelled stroke-only lettering can still resemble cutouts: mark its group with `data-operation="engrave"` or `data-resize="scale"`. This is not a font-recognition algorithm. A standalone circle needs `data-resize="hole"` if there is no enclosing part outline.
 
-Text, `use`, nested SVGs, style sheets, percentage lengths, referenced resources, clipping, masks, filters, and active content are rejected. Export plain paths first. Arbitrary curved slots are treated as holes, so whole-feature preservation works, but width-only slot preservation requires the supported rectangular forms.
+**Detected holes are hardware-like cutouts:** at least 0.5 mm, no more than half the part's smaller side, convex, and point-symmetric (circles, ovals, rounded rectangles, hex nut traps). Detected slots are no wider than half the part. Large or irregular cutouts, such as the openings in decorative ornaments, scale with the design. Mark any other shape with `data-resize="hole"` to keep it fixed.
+
+Text, `use`, nested SVGs, style sheets, percentage lengths, referenced resources, clipping, masks, filters, and active content are rejected. Export plain paths first. Curved slots are not detected; mark them with `data-resize="hole"` for whole-feature preservation. Width-only slot preservation requires the supported rectangular forms.
 
 Stroke widths follow SVG transform behavior; preserving a cut path does not preserve its stroke width. Output dimensions and measurements are always in **mm**, irrespective of input or target units. The resized viewport is the source viewport scaled; it does not automatically crop to the drawing.
 

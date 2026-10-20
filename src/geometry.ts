@@ -92,3 +92,38 @@ export function rectangle(
     width: lengths[1 - long],
   };
 }
+export function hullArea(points: Point[]): number {
+  const p = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  if (p.length < 3) return 0;
+  const half = (list: Point[]) => {
+    const h: Point[] = [];
+    for (const q of list) {
+      while (h.length >= 2 && cross(h[h.length - 2], h[h.length - 1], q) <= 0) h.pop();
+      h.push(q);
+    }
+    h.pop();
+    return h;
+  };
+  return Math.abs(area([...half(p), ...half([...p].reverse())]));
+}
+export function segmentDistance(p: Point, a: Point, b: Point): number {
+  const dx = b[0] - a[0],
+    dy = b[1] - a[1],
+    length = dx * dx + dy * dy,
+    t = length ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / length)) : 0;
+  return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy);
+}
+/** True when the polygon looks the same after a half turn about its box center. */
+export function pointSymmetric(poly: Point[], box: Bounds, tolerance: number): boolean {
+  const cx = 2 * box.x + box.width,
+    cy = 2 * box.y + box.height,
+    step = Math.max(1, Math.floor(poly.length / 64));
+  for (let i = 0; i < poly.length; i += step) {
+    const q: Point = [cx - poly[i][0], cy - poly[i][1]];
+    let nearest = Infinity;
+    for (let j = 0; j < poly.length && nearest > tolerance; j++)
+      nearest = Math.min(nearest, segmentDistance(q, poly[j], poly[(j + 1) % poly.length]));
+    if (nearest > tolerance) return false;
+  }
+  return true;
+}

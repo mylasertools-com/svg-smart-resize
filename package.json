@@ -1,6 +1,6 @@
 {
   "name": "@mylasertools/svg-smart-resize",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Resize SVG designs without resizing their holes and slots. Tiny, dependency-free, browser and Node.js.",
   "type": "module",
   "license": "MIT",

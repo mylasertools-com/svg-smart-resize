@@ -266,3 +266,22 @@ test('analytic arc and cubic bounds preserve symmetric holes after skew', () => 
   near(after.bounds.width, before.bounds.width);
   near(after.bounds.height, before.bounds.height);
 });
+test('large and irregular artwork cutouts scale with the design', () => {
+  const input = svg(
+    outline +
+      '<path id="window" d="M10 5L45 5L45 55L10 55Z"/>' +
+      '<path id="shard" d="M60 10L68 12L70 18L62 20Z"/>' +
+      '<path id="star" d="M80 10L82 15L87 15L83 18L85 23L80 20L75 23L77 18L73 15L78 15Z"/>' +
+      '<circle id="mount" cx="70" cy="45" r="2"/>' +
+      '<path id="nut" d="M84 42L88 42L90 45.5L88 49L84 49L82 45.5Z"/>' +
+      '<circle id="speck" cx="60" cy="30" r="0.1"/>',
+  );
+  const ids = analyzeSvg(input)
+    .features.map((f) => f.elementId)
+    .sort();
+  assert.deepEqual(ids, ['mount', 'nut']);
+  const r = resizeSvg(input, { scale: 0.5, preserve: { holes: true } });
+  const p = analyzeSvg(r.svg);
+  near(find(p, 'mount').bounds.width, 4);
+  assert.equal(find(p, 'window'), undefined);
+});

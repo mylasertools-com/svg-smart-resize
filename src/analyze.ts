@@ -10,7 +10,15 @@ import {
 import { mul, point } from './matrix.js';
 import { bounds, flatten, isClosed, transformPath, type Contour } from './path.js';
 import { readSvg, type Document, type Shape } from './svg.js';
-import { area, boxContains, enclosed, rectangle, cross } from './geometry.js';
+import {
+  area,
+  boxContains,
+  enclosed,
+  hullArea,
+  pointSymmetric,
+  rectangle,
+  cross,
+} from './geometry.js';
 export interface Outline {
   shape: Shape;
   subpath: number;
@@ -34,6 +42,27 @@ export interface Prepared {
   tolerance: number;
 }
 const center = (b: Bounds): Point => [b.x + b.width / 2, b.y + b.height / 2];
+// Detected features are hardware: small next to their part, convex and
+// point-symmetric like circles, ovals, rounded rectangles and nut traps.
+// Large or irregular cutouts are artwork and scale with the design.
+const FEATURE_SHARE = 1 / 2;
+const MIN_HOLE = 0.5;
+const HOLE_SOLIDITY = 0.9;
+const SYMMETRY = 0.03;
+function hardware(outline: Outline, tolerance: number, slot?: { width: number }): boolean {
+  const parent = outline.parent!,
+    limit = Math.min(parent.bounds.width, parent.bounds.height) * FEATURE_SHARE;
+  if (slot) return slot.width <= limit;
+  const size = Math.max(outline.bounds.width, outline.bounds.height),
+    hull = hullArea(outline.polygon);
+  return (
+    size >= MIN_HOLE &&
+    size <= limit &&
+    hull > 0 &&
+    Math.abs(area(outline.polygon)) / hull >= HOLE_SOLIDITY &&
+    pointSymmetric(outline.polygon, outline.bounds, Math.max(tolerance * 2, size * SYMMETRY))
+  );
+}
 export function prepare(svg: string, options: AnalyzeOptions = {}): Prepared {
   const tolerance = options.tolerance ?? 0.02;
   if (!Number.isFinite(tolerance) || tolerance < 0.0001 || tolerance > 1)
@@ -143,7 +172,11 @@ export function prepare(svg: string, options: AnalyzeOptions = {}): Prepared {
       ];
       slot = rectangle(corners.map((p) => point(outline.matrix, p)));
     }
-    if (mark === 'hole' || mark === 'slot' || outline.depth % 2 === 1) {
+    if (
+      mark === 'hole' ||
+      mark === 'slot' ||
+      (outline.depth % 2 === 1 && hardware(outline, tolerance, slot))
+    ) {
       const kind = mark === 'hole' ? 'hole' : mark === 'slot' || slot ? 'slot' : 'hole';
       if (kind === 'slot' && !slot)
         throw new SvgResizeError(
